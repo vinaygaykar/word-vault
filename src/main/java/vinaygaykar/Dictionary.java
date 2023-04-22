@@ -3,6 +3,7 @@ package vinaygaykar;
 import java.util.List;
 import java.util.Optional;
 
+
 /**
  * A Dictionary interface to store key-value pairs for each word.
  *
@@ -36,7 +37,6 @@ public interface Dictionary<V> {
      * @return a list of words that start with the given prefix, up to a maximum of count.
      */
     List<String> hasPrefix(final String prefix, final int count);
-
 
     /**
      * Returns the number of words in the dictionary.
