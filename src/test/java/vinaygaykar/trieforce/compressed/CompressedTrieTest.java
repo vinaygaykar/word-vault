@@ -25,14 +25,14 @@ class CompressedTrieTest {
 
 		// then
 		// Add - null & empty word
-		assertThrows(IllegalArgumentException.class, () -> trie.add(null, null));
-		assertThrows(IllegalArgumentException.class, () -> trie.add("", null));
+		assertThrows(NullPointerException.class, () -> trie.put(null, null));
+		assertThrows(IllegalArgumentException.class, () -> trie.put("", null));
 		// Add - null value
-		assertThrows(IllegalArgumentException.class, () -> trie.add("something", null));
+		assertThrows(NullPointerException.class, () -> trie.put("something", null));
 
 		// Get - null & empty word
-		assertFalse(trie.getValue(null).isPresent());
-		assertFalse(trie.getValue("").isPresent());
+		assertThrows(NullPointerException.class, () -> trie.get(null));
+		assertThrows(IllegalArgumentException.class, () -> trie.get(""));
 	}
 
 	@DisplayName("Add and Search for sample words, testing basic functionality")
@@ -40,80 +40,53 @@ class CompressedTrieTest {
 	void testAddAndGet() {
 		// given
 		final CompressedTrie<Integer> trie = new CompressedTrie<>();
-		trie.add("apple", 1);
-		trie.add("apply", 11);
-		trie.add("banana", 2);
-		trie.add("orange", 3);
+		trie.put("apple", 1);
+		trie.put("apply", 11);
+		trie.put("banana", 2);
+		trie.put("orange", 3);
 
 		// then
-		assertEquals(Optional.of(1), trie.getValue("apple"));
-		assertEquals(Optional.of(11), trie.getValue("apply"));
-		assertEquals(Optional.of(2), trie.getValue("banana"));
-		assertEquals(Optional.of(3), trie.getValue("orange"));
+		assertEquals(Optional.of(1), trie.get("apple"));
+		assertEquals(Optional.of(11), trie.get("apply"));
+		assertEquals(Optional.of(2), trie.get("banana"));
+		assertEquals(Optional.of(3), trie.get("orange"));
 		// Search for non-existing word
-		assertEquals(Optional.empty(), trie.getValue("pear"));
+		assertEquals(Optional.empty(), trie.get("pear"));
 
 		// assert number of words inserted
 		assertEquals(4, trie.size());
 	}
 
-	@DisplayName("Validate `add()` and `getValue()` on default merge function")
+	@DisplayName("Checking for `getKeysWithPrefix()` on null or Empty word should throw error")
 	@Test
-	void testAddAndGet_DefaultMergeFn() {
-		// given
-		final CompressedTrie<Integer> trie = new CompressedTrie<>();
-
-		// when
-		trie.add("hello", 1);
-		trie.add("hello", 2);
-
-		// then
-		assertEquals(2, trie.getValue("hello").orElse(-1));
-	}
-
-	@DisplayName("Validate `add()` and `getValue()` on custom merge function")
-	@Test
-	void testAddAndGet_CustomMergeFn() {
-		// given
-		final CompressedTrie<Integer> trie = new CompressedTrie<>(Integer::sum);
-
-		// when
-		trie.add("hello", 100);
-		trie.add("hello", 200);
-
-		// then
-		assertEquals(300, trie.getValue("hello").orElse(-1));
-	}
-
-	@DisplayName("Checking for `hasPrefix()` on null or Empty word should return empty list for any count")
-	@Test
-	void testHasPrefix_NullAndEmpty() {
+	void testGetKeysWithPrefix_NullAndEmpty() {
 		// given
 		final CompressedTrie<Integer> trie = new CompressedTrie<>();
 
 		// then
-		assertTrue(trie.hasPrefix(null, 1).isEmpty());
-		assertTrue(trie.hasPrefix("", 1).isEmpty());
+		assertThrows(NullPointerException.class, () -> trie.getKeysWithPrefix(null, 1));
+		assertThrows(IllegalArgumentException.class, () -> trie.getKeysWithPrefix("", 1));
 	}
 
-	@DisplayName("Validate return value from `hasPrefix()` when both existing and non-existing words are passed")
+	@DisplayName("Validate return value from `getKeysWithPrefix()` when both existing and non-existing words are " +
+			"passed")
 	@Test
-	void testHasPrefix() {
+	void testGetKeysWithPrefix() {
 		// given
 		final CompressedTrie<Integer> trie = new CompressedTrie<>();
-		trie.add("apple", 1);
-		trie.add("apply", 11);
-		trie.add("banana", 2);
-		trie.add("orange", 3);
-		trie.add("peach", 4);
-		trie.add("pear", 5);
-		trie.add("pineapple", 6);
+		trie.put("apple", 1);
+		trie.put("apply", 11);
+		trie.put("banana", 2);
+		trie.put("orange", 3);
+		trie.put("peach", 4);
+		trie.put("pear", 5);
+		trie.put("pineapple", 6);
 
 		// then
 		final List<String> expected = Arrays.asList("apple", "apply");
-		assertEquals(expected, trie.hasPrefix("a", 3));
-		assertEquals(Arrays.asList("peach", "pear", "pineapple"), trie.hasPrefix("p", 3));
-		assertEquals(Collections.emptyList(), trie.hasPrefix("z", 3));
+		assertEquals(expected, trie.getKeysWithPrefix("a", 3));
+		assertEquals(Arrays.asList("peach", "pear", "pineapple"), trie.getKeysWithPrefix("p", 3));
+		assertEquals(Collections.emptyList(), trie.getKeysWithPrefix("z", 3));
 	}
 
 	@DisplayName("New node is added like an extension when new word of greater length but common prefix is added")
@@ -121,7 +94,7 @@ class CompressedTrieTest {
 	void testAdd() {
 		final CompressedTrie<Integer> trie = new CompressedTrie<>();
 
-		trie.add("appear", 1);
+		trie.put("appear", 1);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());
@@ -132,7 +105,7 @@ class CompressedTrieTest {
 			assertEquals(2, trie.getCountOfNodes());
 		}
 
-		trie.add("appearance", 2);
+		trie.put("appearance", 2);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());
@@ -157,7 +130,7 @@ class CompressedTrieTest {
 	void testAdd2() {
 		final CompressedTrie<Integer> trie = new CompressedTrie<>();
 
-		trie.add("appearance", 1);
+		trie.put("appearance", 1);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());
@@ -168,7 +141,7 @@ class CompressedTrieTest {
 			assertEquals(2, trie.getCountOfNodes());
 		}
 
-		trie.add("appear", 2);
+		trie.put("appear", 2);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());
@@ -191,7 +164,7 @@ class CompressedTrieTest {
 	void testAdd3() {
 		final CompressedTrie<Integer> trie = new CompressedTrie<>();
 
-		trie.add("appeaser", 1);
+		trie.put("appeaser", 1);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());
@@ -202,7 +175,7 @@ class CompressedTrieTest {
 			assertEquals(2, trie.getCountOfNodes());
 		}
 
-		trie.add("appeasement", 2);
+		trie.put("appeasement", 2);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());
@@ -225,7 +198,7 @@ class CompressedTrieTest {
 			assertEquals(4, trie.getCountOfNodes());
 		}
 
-		trie.add("appeasable", 3);
+		trie.put("appeasable", 3);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());
@@ -259,7 +232,7 @@ class CompressedTrieTest {
 			assertEquals(6, trie.getCountOfNodes());
 		}
 
-		trie.add("appear", 4);
+		trie.put("appear", 4);
 		{
 			final Optional<CompressedTrie.Node<Integer>> a = trie.find("a");
 			assertTrue(a.isPresent());

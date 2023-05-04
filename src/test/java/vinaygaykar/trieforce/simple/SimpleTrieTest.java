@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,14 +21,14 @@ class SimpleTrieTest {
 
 		// then
 		// Add - null & empty word
-		assertThrows(IllegalArgumentException.class, () -> trie.add(null, null));
-		assertThrows(IllegalArgumentException.class, () -> trie.add("", null));
+		assertThrows(NullPointerException.class, () -> trie.put(null, null));
+		assertThrows(IllegalArgumentException.class, () -> trie.put("", null));
 		// Add - null value
-		assertThrows(IllegalArgumentException.class, () -> trie.add("something", null));
+		assertThrows(NullPointerException.class, () -> trie.put("something", null));
 
 		// Get - null & empty word
-		assertFalse(trie.getValue(null).isPresent());
-		assertFalse(trie.getValue("").isPresent());
+		assertThrows(NullPointerException.class, () -> trie.get(null));
+		assertThrows(IllegalArgumentException.class, () -> trie.get(""));
 	}
 
 	@DisplayName("Add and Search for sample words, testing basic functionality")
@@ -38,74 +37,47 @@ class SimpleTrieTest {
 		// given
 		final SimpleTrie<Integer> trie = new SimpleTrie<>();
 		// add some words
-		trie.add("hello", 1);
-		trie.add("world", 2);
-		trie.add("pneumonoultramicroscopicsilicovolcanoconiosis", 3);
+		trie.put("hello", 1);
+		trie.put("world", 2);
+		trie.put("pneumonoultramicroscopicsilicovolcanoconiosis", 3);
 
 		// then
-		assertEquals(1, trie.getValue("hello").orElse(-1));
-		assertEquals(2, trie.getValue("world").orElse(-1));
-		assertEquals(3, trie.getValue("pneumonoultramicroscopicsilicovolcanoconiosis").orElse(-1));
+		assertEquals(1, trie.get("hello").orElse(-1));
+		assertEquals(2, trie.get("world").orElse(-1));
+		assertEquals(3, trie.get("pneumonoultramicroscopicsilicovolcanoconiosis").orElse(-1));
 		// words with no value present
-		assertFalse(trie.getValue("pneumonoultra").isPresent()); // half of the actual word
-		assertFalse(trie.getValue("pneab").isPresent()); // '*ab' split in a non-existing branch
+		assertFalse(trie.get("pneumonoultra").isPresent()); // half of the actual word
+		assertFalse(trie.get("pneab").isPresent()); // '*ab' split in a non-existing branch
 		// assert number of words inserted
 		assertEquals(3, trie.size());
 	}
 
-	@DisplayName("Validate `add()` and `getValue()` on default merge function")
+	@DisplayName("Checking for `getKeysWithPrefix()` on null or Empty word should throw wrror")
 	@Test
-	void testAddAndGet_DefaultMergeFn() {
-		// given
-		final SimpleTrie<Integer> trie = new SimpleTrie<>();
-
-		// when
-		trie.add("hello", 1);
-		trie.add("hello", 2);
-
-		// then
-		assertEquals(2, trie.getValue("hello").orElse(-1));
-	}
-
-	@DisplayName("Validate `add()` and `getValue()` on custom merge function")
-	@Test
-	void testAddAndGet_CustomMergeFn() {
-		// given
-		final SimpleTrie<Integer> trie = new SimpleTrie<>(Integer::sum);
-
-		// when
-		trie.add("hello", 100);
-		trie.add("hello", 200);
-
-		// then
-		assertEquals(300, trie.getValue("hello").orElse(-1));
-	}
-
-	@DisplayName("Checking for `hasPrefix()` on null or Empty word should return empty list for any count")
-	@Test
-	void testHasPrefix_NullAndEmpty() {
+	void testGetKeysWithPrefix_NullAndEmpty() {
 		// given
 		final SimpleTrie<Integer> trie = new SimpleTrie<>();
 
 		// then
-		assertTrue(trie.hasPrefix(null, 1).isEmpty());
-		assertTrue(trie.hasPrefix("", 1).isEmpty());
+		assertThrows(NullPointerException.class, () -> trie.getKeysWithPrefix(null, 1));
+		assertThrows(IllegalArgumentException.class, () -> trie.getKeysWithPrefix("", 1));
 	}
 
-	@DisplayName("Validate return value from `hasPrefix()` when both existing and non-existing words are passed")
+	@DisplayName("Validate return value from `getKeysWithPrefix()` when both existing and non-existing words are " +
+			"passed")
 	@Test
-	void testHasPrefix() {
+	void testGetKeysWithPrefix() {
 		// given
 		final SimpleTrie<String> trie = new SimpleTrie<>();
 		// add some words
-		trie.add("hello", "abc");
-		trie.add("world", "def");
+		trie.put("hello", "abc");
+		trie.put("world", "def");
 
 		// then
 		// Test prefix has
-		assertArrayEquals(trie.hasPrefix("he", 10).toArray(), new String[]{ "hello" });
-		assertArrayEquals(trie.hasPrefix("wor", 10).toArray(), new String[]{ "world" });
-		assertTrue(trie.hasPrefix("foo", 10).isEmpty());
+		assertArrayEquals(trie.getKeysWithPrefix("he", 10).toArray(), new String[]{ "hello" });
+		assertArrayEquals(trie.getKeysWithPrefix("wor", 10).toArray(), new String[]{ "world" });
+		assertTrue(trie.getKeysWithPrefix("foo", 10).isEmpty());
 	}
 
 }

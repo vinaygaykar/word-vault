@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.function.BinaryOperator;
 
 import vinaygaykar.trieforce.Trie;
 
@@ -16,51 +15,31 @@ public class CompressedTrie<V> extends Trie<V> {
 
 	private final Node<V> root;
 
-	private final BinaryOperator<V> mergeFunction;
-
 	private long words;
 
 	private long nodes;
 
 
-	/**
-	 * Creates an object of this class with a "replacing" merge function. If similar words are inserted but with
-	 * different values then value the word last inserted will be stored.
-	 */
 	public CompressedTrie() {
-		this((o, n) -> n);
-	}
-
-	/**
-	 * Creates an object of this class with given merge function.
-	 *
-	 * @param mergeFunction This parameter will be used to resolve any conflicts that arise when two same words with
-	 *                      different values are inserted.
-	 */
-	public CompressedTrie(final BinaryOperator<V> mergeFunction) {
 		this.root = new Node<>();
-		this.mergeFunction = mergeFunction;
 		this.words = 0L;
 		this.nodes = 1L; // root is always there
 	}
 
 	@Override
-	public void add(final String word, final V value) {
-		if (word == null || word.isEmpty())
-			throw new IllegalArgumentException("Cannot insert null or empty string");
-
-		if (value == null)
-			throw new IllegalArgumentException("Null value object for word association is not allowed");
+	public Optional<V> put(final String key, final V value) {
+		validateKey(key);
+		validateValue(value);
 
 		Node<V> current = root;
-		for (int i = 0; i < word.length(); ++i) {
-			final char ch = word.charAt(i);
+		for (int i = 0; i < key.length(); ++i) {
+			final char ch = key.charAt(i);
 			final Node<V> next = current.children.get(ch);
 
 			if (next == null) {
 				final Node<V> node = new Node<>();
 				nodes++;
-				node.prefix.append(word.substring(i + 1));
+				node.prefix.append(key.substring(i + 1));
 
 				current.children.put(ch, node);
 				current = node;
@@ -70,8 +49,8 @@ public class CompressedTrie<V> extends Trie<V> {
 				continue;
 			}
 
-			final int len = (i < word.length() - 1)
-							? getCommonPrefixLength(next.prefix, word.substring(i + 1))
+			final int len = (i < key.length() - 1)
+							? getCommonPrefixLength(next.prefix, key.substring(i + 1))
 							: 0;
 
 			if (len == 0) {
@@ -87,10 +66,11 @@ public class CompressedTrie<V> extends Trie<V> {
 			}
 		}
 
-		if (current.value != null) current.value = mergeFunction.apply(current.value, value);
-		else current.value = value;
-
 		words++;
+		if (current.value == null) {
+			current.value = value;
+			return Optional.empty();
+		} else return Optional.of(current.value);
 	}
 
 	private void splitNode(final Node<V> node, final int point) {
@@ -114,12 +94,18 @@ public class CompressedTrie<V> extends Trie<V> {
 	}
 
 	@Override
-	public Optional<V> getValue(final String word) {
-		return find(word).map(node -> node.value);
+	public Optional<V> get(final String key) {
+		validateKey(key);
+
+		return find(key).map(node -> node.value);
 	}
 
 	@Override
-	public List<String> hasPrefix(final String prefix, final int count) {
+	public List<String> getKeysWithPrefix(final String prefix, final int count) {
+		validateKey(prefix);
+		if (count < 1)
+			throw new IllegalArgumentException("Count of values to return with prefix is not a positive number");
+
 		final Optional<Node<V>> nodeOpt = find(prefix);
 		if (!nodeOpt.isPresent())
 			return Collections.emptyList();
@@ -132,20 +118,20 @@ public class CompressedTrie<V> extends Trie<V> {
 	}
 
 	@Override
-	public Optional<Node<V>> find(final String word) {
-		if (word == null || word.isEmpty())
+	protected Optional<Node<V>> find(final String key) {
+		if (key == null || key.isEmpty())
 			return Optional.empty();
 
 		Node<V> current = root;
-		for (int i = 0; i < word.length(); ++i) {
-			final char ch = word.charAt(i);
+		for (int i = 0; i < key.length(); ++i) {
+			final char ch = key.charAt(i);
 
 			if (!current.children.containsKey(ch))
 				return Optional.empty();
 
 			final Node<V> next = current.children.get(ch);
-			final int len = getCommonPrefixLength(next.prefix, word.substring(i + 1));
-			if (i != word.length() - 1 && len < next.prefix.length())
+			final int len = getCommonPrefixLength(next.prefix, key.substring(i + 1));
+			if (i != key.length() - 1 && len < next.prefix.length())
 				return Optional.empty();
 
 			i += len;
@@ -179,9 +165,8 @@ public class CompressedTrie<V> extends Trie<V> {
 		return this.words;
 	}
 
-
 	@Override
-	public long getCountOfNodes() {
+	protected long getCountOfNodes() {
 		return this.nodes;
 	}
 
