@@ -80,4 +80,84 @@ class SimpleTrieTest {
 		assertTrue(trie.getKeysWithPrefix("foo", 10).isEmpty());
 	}
 
+	@DisplayName("Basic `remove()` functionality test")
+	@Test
+	void testRemoveExistingWord() {
+		// given
+		final SimpleTrie<Integer> trie = new SimpleTrie<>();
+
+		// when
+		trie.put("hello", 1);
+
+		// then
+		assertTrue(trie.get("hello").isPresent());
+		assertEquals(1, trie.remove("hello").orElse(Integer.MIN_VALUE));
+		assertFalse(trie.get("hello").isPresent());
+
+		assertFalse(trie.get("world").isPresent()); // verify the word does not exist
+		assertFalse(trie.remove("world").isPresent()); // test removing non-existent word
+
+		assertEquals(0, trie.size());
+		assertEquals(1, trie.getCountOfNodes());
+	}
+
+	@DisplayName("Removing a longer word which has a prefix word should not affect the prefix word")
+	@Test
+	void testRemoveLongerWord() {
+		// given
+		final SimpleTrie<Integer> trie = new SimpleTrie<>();
+
+		// when
+		trie.put("hello", 1);
+		trie.put("hell", 2);
+
+		// then
+		assertEquals(1, trie.remove("hello").orElse(Integer.MIN_VALUE));
+		assertFalse(trie.get("hello").isPresent());
+		assertTrue(trie.get("hell").isPresent());
+
+		assertEquals(1, trie.size());
+		assertEquals(5, trie.getCountOfNodes());
+	}
+
+	@DisplayName("Removing a word which is prefix of a longer word should not affect the longer word")
+	@Test
+	void testRemovePrefixWord() {
+		// given
+		final SimpleTrie<Integer> trie = new SimpleTrie<>();
+
+		// when
+		trie.put("hello", 1);
+		trie.put("hell", 2);
+
+		// then
+		assertEquals(2, trie.remove("hell").orElse(Integer.MIN_VALUE));
+		assertTrue(trie.get("hello").isPresent());
+		assertFalse(trie.get("hell").isPresent());
+
+		assertEquals(1, trie.size());
+		assertEquals(6, trie.getCountOfNodes());
+	}
+
+	@DisplayName("Removing an intermediate word should not affect other present words")
+	@Test
+	void testRemoveIntermediateNode() {
+		// given
+		final SimpleTrie<Integer> trie = new SimpleTrie<>();
+
+		// when
+		trie.put("hello", 1);
+		trie.put("help", 2);
+		trie.put("world", 3);
+
+		// then
+		assertEquals(2, trie.remove("help").orElse(Integer.MIN_VALUE));
+		assertFalse(trie.get("help").isPresent());
+		assertTrue(trie.get("hello").isPresent());
+		assertTrue(trie.get("world").isPresent());
+
+		assertEquals(2, trie.size());
+		assertEquals(11, trie.getCountOfNodes());
+	}
+
 }

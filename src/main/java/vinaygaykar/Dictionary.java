@@ -9,43 +9,54 @@ import java.util.function.Function;
 
 
 /**
- * This class maps a {@link String} called {@code key} to a given {@code value} of type {@code V}. This interface has
- * been modelled after but is not similar to {@link java.util.Map}. At its core it is a key-value pair data storage
- * where a key should be a non-null and non-empty {@link String}. Value should be non-null object of type {@code V}.
+ * A simple interface that defines a dictionary data structure that can store key-value pairs. The dictionary is
+ * a collection of unique keys, and each key maps to a value object. The keys are stored as a {@code String} object
+ * and the values can be of any type V, defined at runtime.
  * <p>
- * {@code null} keys or values are strictly prohibited.
+ * This interface has been modelled after but is not similar to {@link java.util.Map}. {@code null} keys or values
+ * are strictly prohibited.
+ * <p>
+ * This interface provides methods for adding and removing key-value pairs, and searching for values associated with
+ * a given key or keys with a given prefix. The {@code Optional} type is used in the return type of all methods that
+ * return values, to handle null cases gracefully.
+ * <p>
+ * All methods of this interface that take a key as a parameter will throw an {@code IllegalArgumentException}
+ * if the key is an empty string, and a {@code NullPointerException} if the key is null. Similarly, methods that
+ * take a value as a parameter will throw a {@code NullPointerException} if the value is null.
  *
- * @param <V> the type of the value object associated with each word
+ * @param <V> The type of the values that are stored in the dictionary
  *
  * @author Vinay Gaykar
  */
 public interface Dictionary<V> {
 
 	/**
-	 * Inserts a key with an associated value into the dictionary if it was not present. If key was present then the
-	 * existing value is replaced with the new value object. Returned value is previous associated value (which can be
-	 * null if this key is new).
+	 * Inserts a {@code key} with the associated {@code value} into the dictionary if it was not present. If the
+	 * {@code key} is already present then the existing associated value is replaced with the new {@code value} object.
+	 * <p>
+	 * Return object is previous associated value if key was already present or else {@code null} if this key is new.
 	 *
-	 * @param key   the key to be inserted
-	 * @param value the associated value object for the key
+	 * @param key   the {@code key} to be added
+	 * @param value the associated {@code value} object for the given {@code key}
 	 *
-	 * @return Previous value associated with the key
+	 * @return Previous {@code value} associated with the {@code key}
 	 *
-	 * @throws IllegalArgumentException if the key is empty
-	 * @throws NullPointerException     if key or value is null
+	 * @throws IllegalArgumentException if the {@code key} is empty
+	 * @throws NullPointerException     if {@code key} or {@code value} is {@code null}
 	 */
 	Optional<V> put(final String key, final V value);
 
 	/**
-	 * Retrieves the {@code value} object associated with the key, if present in the dictionary.
+	 * Retrieves associated {@code value} object associated with the given {@code key}, if present in the dictionary
+	 * or else return {@link Optional#empty()}.
 	 *
-	 * @param key the key to retrieve the value object for
+	 * @param key the {@code key} to retrieve the {@code value} object for
 	 *
-	 * @return an {@link Optional} object containing the associated value object, or an empty {@link Optional} if the
-	 * key is not present
+	 * @return an {@link Optional} object containing the associated {@code value} object, or {@link Optional#empty()}
+	 * if the {@code key} is not present
 	 *
-	 * @throws IllegalArgumentException if the key is empty
-	 * @throws NullPointerException     if key or value is null
+	 * @throws IllegalArgumentException if the {@code key} is empty
+	 * @throws NullPointerException     if {@code key} is {@code null}
 	 */
 	Optional<V> get(final String key);
 
@@ -58,9 +69,28 @@ public interface Dictionary<V> {
 	 *
 	 * @return a {@link List} of keys that start with the given prefix, up to a maximum of count
 	 *
-	 * @throws IllegalArgumentException if the key is null or empty or count is not positive
+	 * @throws IllegalArgumentException if the {@code key} is empty or count is not positive
+	 * @throws NullPointerException     if {@code key} is {@code null}
 	 */
 	List<String> getKeysWithPrefix(final String prefix, final int count);
+
+	/**
+	 * Removes the {@code key} from this dictionary if it is present (optional operation).
+	 * <p>
+	 * Returns the {@code value} to which this map previously associated the {@code key}, or <tt>null</tt> if the map
+	 * contained no mapping for the {@code key}.
+	 * <p>
+	 * The map will not contain a mapping for the specified {@code key} once the call returns.
+	 *
+	 * @param key {@code key} to be removed
+	 *
+	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt> if there was no mapping for
+	 * <tt>key</tt>.
+	 *
+	 * @throws NullPointerException     if the specified {@code key} is {@code null}
+	 * @throws IllegalArgumentException if the specified {@code key} is empty
+	 */
+	Optional<V> remove(final String key);
 
 	/**
 	 * Returns the number of words in the dictionary.
@@ -70,52 +100,53 @@ public interface Dictionary<V> {
 	long size();
 
 
-	// Defaultable methods
+	// Defaultable & composite methods
 
 	/**
-	 * If the key is not present then it will be entered into the vault associated with the value and {@code null} is
-	 * returned. If key is already present then return the associated value.
+	 * Only inserts the key-value pair if the key is absent from the dictionary. If the key is already present then
+	 * no operation is performed.
 	 *
-	 * @param key   key with which the specified value is to be associated
-	 * @param value value to be associated with the specified key
+	 * @param key   {@code key} to add
+	 * @param value associated {@code value} object
 	 *
-	 * @return the previous value associated with the specified key, or {@code null} if there was no mapping for the
-	 * key
+	 * @return the previously associated {@code value} object, or {@code null} if there was no mapping for the
+	 * {@code key}
 	 *
-	 * @throws IllegalArgumentException if the key is empty
-	 * @throws NullPointerException     if key or value is null
-	 * @implSpec The default implementation is equivalent to, for this {@code dictionary}:
-	 *
+	 * @throws IllegalArgumentException if the {@code key} is empty
+	 * @throws NullPointerException     if {@code key} or {@code value} is {@code null}
+	 * @implSpec The default implementation is equivalent to:
 	 * <pre>
 	 * {@code
 	 * 		V oldVal = get(key);
 	 * 		if (oldVal == null) {
-	 * 		    put(key, value);
-	 * 		    return value;
+	 * 			put(key, value);
+	 * 			return null;
 	 *        }
 	 * 		else return oldVal;
 	 * }
 	 * </pre>
 	 */
-	default V putIfAbsent(final String key, final V value) {
+	default Optional<V> putIfAbsent(final String key, final V value) {
 		validateKey(key);
 		validateValue(value);
 
-		return get(key)
-				.orElseGet(() -> {
-					put(key, value);
-					return value;
-				});
+		final Optional<V> oldVal = get(key);
+		if (!oldVal.isPresent()) {
+			put(key, value);
+			return Optional.empty();
+		} else return oldVal;
 	}
 
 	/**
-	 * If the specified key is not already associated with a value, attempts to compute its value using the given
-	 * mapping function and enters it into this dictionary.
+	 * If the specified {@code key} is not already associated with a {@code value}, attempts to compute its
+	 * {@code value} using the given {@code mappingFunction} and enters it into this dictionary.
 	 * <p>
-	 * If the key is to be inserted i.e. no current value association is present and the remapping function returns
-	 * {@code null} then {@link IllegalArgumentException} is thrown. If the function itself throws an (unchecked)
-	 * exception, the exception is rethrown, and no mapping is recorded. The most common usage is to construct a new
-	 * object serving as an initial mapped value or memoized result, as in:
+	 * If the {@code key} is to be inserted i.e. no {@code value} is associated and the mapping function returns
+	 * {@code null} then no mapping is recorded. If the function itself throws  an (unchecked) exception, the
+	 * exception is rethrown, and no mapping is recorded.
+	 * <p>
+	 * The most common usage is to construct a new object serving as an initial mapped {@code value} or memoized
+	 * result, as in:
 	 *
 	 * <pre>
 	 * {@code
@@ -124,23 +155,23 @@ public interface Dictionary<V> {
 	 * </pre>
 	 *
 	 * <p>
-	 * Or to implement a multi-value dictionary, {@code Dictionary<Collection<V>>}, supporting multiple values per key:
+	 * Or to implement a multi-value dictionary, {@code Dictionary<Collection<V>>}, supporting multiple values per
+	 * {@code key}:
 	 * <pre>
 	 * {@code
 	 * 		dictionary.computeIfAbsent(key, k -> new HashSet<V>()).add(v);
 	 * }
 	 * </pre>
 	 *
-	 * @param key             key with which the specified value is to be associated
-	 * @param mappingFunction the function to compute a value
+	 * @param key             {@code key} to check
+	 * @param mappingFunction the function to compute a new {@code value} object
 	 *
-	 * @return the current (existing or computed) value associated with the specified key
+	 * @return the current (existing or computed) {@code value} associated with the specified {@code key}
 	 *
-	 * @throws NullPointerException     if the key or mappingFunction is null or new value generated from remapping
-	 *                                  function is null
-	 * @throws IllegalArgumentException if specified key is empty
+	 * @throws NullPointerException     if the {@code key}, {@code mappingFunction} is {@code null} or the new
+	 *                                  {@code value} object generated from the function is {@code null}
+	 * @throws IllegalArgumentException if specified {@code key} is empty
 	 * @implSpec The default implementation is equivalent to the following steps
-	 *
 	 * <pre>
 	 * {@code
 	 * 		if (dictionary.get(key) == null) {
@@ -150,43 +181,46 @@ public interface Dictionary<V> {
 	 * }
 	 * </pre>
 	 */
-	default V computeIfAbsent(final String key,
-							  final Function<String, ? extends V> mappingFunction) {
+	default Optional<V> computeIfAbsent(final String key,
+										final Function<String, ? extends V> mappingFunction) {
 		Objects.requireNonNull(mappingFunction);
 		validateKey(key);
 
-		return get(key)
-				.orElseGet(() -> {
-					final V v = mappingFunction.apply(key);
-					put(key, v);
-					return v;
-				});
+		final Optional<V> oldVal = get(key);
+		if (!oldVal.isPresent()) {
+			final V newVal = mappingFunction.apply(key);
+			if (newVal != null) put(key, newVal);
+
+			return Optional.ofNullable(newVal);
+		}
+
+		return oldVal;
 	}
 
 	/**
-	 * If the value for the specified key is present, attempts to compute a new value using {@code remappingFunction}
-	 * giving the key and its current mapped value.
+	 * If the {@code value} for the specified {@code key} is present, attempts to compute a new {@code value} object
+	 * using {@code remappingFunction} and associating it with the {@code key}. Returns the new mapped {@code value}.
 	 * <p>
-	 * If the function returns {@code null}, {@link NullPointerException} will be thrown. If the function itself
-	 * throws an (unchecked) exception, the exception is rethrown, and the current mapping is left unchanged.
+	 * If the function returns {@code null}, the mapping is removed. If the function itself throws an (unchecked)
+	 * exception, the exception is rethrown, and the current mapping is left unchanged.
 	 *
-	 * @param key               key with which the specified value is to be associated
-	 * @param remappingFunction the function to compute a value
+	 * @param key               {@code key} to check
+	 * @param remappingFunction the function to compute the new {@code value} object
 	 *
-	 * @return the new value associated with the specified key
+	 * @return the new {@code value} object associated with the specified {@code key}, or {@link Optional#empty()} if
+	 * the key is not present
 	 *
-	 * @throws NullPointerException     if the key, remappingFunction  or new value generated from remapping
-	 *                                  function is null
-	 * @throws IllegalArgumentException if key is empty
-	 * @implSpec The default implementation is equivalent to performing the following steps for this {@code map},
-	 * then returning the current value or {@code null} if now absent:
-	 *
+	 * @throws NullPointerException     if the {@code key}, {@code remappingFunction} or new {@code value} generated
+	 *                                  from the function is {@code null}
+	 * @throws IllegalArgumentException if {@code key} is empty
+	 * @implSpec The default implementation is equivalent to performing the following steps:
 	 * <pre>
 	 * {@code
-	 * 		if (map.get(key) != null) {
-	 * 			V oldValue = map.get(key);
+	 * 		if (get(key) != null) {
+	 * 			V oldValue = get(key);
 	 * 			V newValue = remappingFunction.apply(key, oldValue);
-	 * 			if (newValue != null) map.put(key, newValue);
+	 * 			if (newValue != null) put(key, newValue);
+	 * 			else remove(key);
 	 *    }
 	 * }
 	 * </pre>
@@ -199,7 +233,9 @@ public interface Dictionary<V> {
 		return get(key)
 				.map(oldValue -> {
 					final V newValue = remappingFunction.apply(key, oldValue);
-					put(key, newValue);
+					if (newValue == null) remove(key);
+					else put(key, newValue);
+
 					return newValue;
 				});
 	}

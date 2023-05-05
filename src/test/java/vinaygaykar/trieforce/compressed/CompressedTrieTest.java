@@ -89,6 +89,86 @@ class CompressedTrieTest {
 		assertEquals(Collections.emptyList(), trie.getKeysWithPrefix("z", 3));
 	}
 
+	@DisplayName("Basic `remove()` functionality test")
+	@Test
+	void testRemoveExistingWord() {
+		// given
+		final CompressedTrie<Integer> trie = new CompressedTrie<>();
+
+		// when
+		trie.put("hello", 1);
+
+		// then
+		assertTrue(trie.get("hello").isPresent());
+		assertEquals(1, trie.remove("hello").orElse(Integer.MIN_VALUE));
+		assertFalse(trie.get("hello").isPresent());
+
+		assertFalse(trie.get("world").isPresent()); // verify the word does not exist
+		assertFalse(trie.remove("world").isPresent()); // test removing non-existent word
+
+		assertEquals(0, trie.size());
+		assertEquals(1, trie.getCountOfNodes());
+	}
+
+	@DisplayName("Removing a longer word which has a prefix word should not affect the prefix word")
+	@Test
+	void testRemoveLongerWord() {
+		// given
+		final CompressedTrie<Integer> trie = new CompressedTrie<>();
+
+		// when
+		trie.put("hello", 1);
+		trie.put("hell", 2);
+
+		// then
+		assertEquals(1, trie.remove("hello").orElse(Integer.MIN_VALUE));
+		assertFalse(trie.get("hello").isPresent());
+		assertTrue(trie.get("hell").isPresent());
+
+		assertEquals(1, trie.size());
+		assertEquals(2, trie.getCountOfNodes());
+	}
+
+	@DisplayName("Removing a word which is prefix of a longer word should not affect the longer word")
+	@Test
+	void testRemovePrefixWord() {
+		// given
+		final CompressedTrie<Integer> trie = new CompressedTrie<>();
+
+		// when
+		trie.put("hello", 1);
+		trie.put("hell", 2);
+
+		// then
+		assertEquals(2, trie.remove("hell").orElse(Integer.MIN_VALUE));
+		assertTrue(trie.get("hello").isPresent());
+		assertFalse(trie.get("hell").isPresent());
+
+		assertEquals(1, trie.size());
+		assertEquals(2, trie.getCountOfNodes());
+	}
+
+	@DisplayName("Removing an intermediate word should not affect other present words")
+	@Test
+	void testRemoveIntermediateNode() {
+		// given
+		final CompressedTrie<Integer> trie = new CompressedTrie<>();
+
+		// when
+		trie.put("hello", 1);
+		trie.put("help", 2);
+		trie.put("world", 3);
+
+		// then
+		assertEquals(2, trie.remove("help").orElse(Integer.MIN_VALUE));
+		assertFalse(trie.get("help").isPresent());
+		assertTrue(trie.get("hello").isPresent());
+		assertTrue(trie.get("world").isPresent());
+
+		assertEquals(2, trie.size());
+		assertEquals(3, trie.getCountOfNodes());
+	}
+
 	@DisplayName("New node is added like an extension when new word of greater length but common prefix is added")
 	@Test
 	void testAdd() {
@@ -122,7 +202,6 @@ class CompressedTrieTest {
 			assertEquals(3, trie.getCountOfNodes());
 		}
 	}
-
 
 	@DisplayName("Existing node is split into two when new word is added " +
 			"which is already part of an existing word's prefix")

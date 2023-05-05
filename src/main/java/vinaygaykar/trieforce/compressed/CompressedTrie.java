@@ -170,6 +170,56 @@ public class CompressedTrie<V> extends Trie<V> {
 		return this.nodes;
 	}
 
+	@Override
+	public Optional<V> remove(final String key) {
+		validateKey(key);
+
+		return Optional.ofNullable(remove(key, root, 0));
+	}
+
+	private V remove(final String key, final Node<V> current, final int pos) {
+		if (pos == key.length()) {
+			if (!current.isTerminal()) return null;
+
+			final V val = current.value;
+			current.value = null;
+			words--;
+
+			mergeNode(current);
+			return val;
+		}
+
+		final char ch = key.charAt(pos);
+		final Node<V> node = current.children.get(ch);
+
+		if (node == null) return null;
+
+		final int newPos = pos + getCommonPrefixLength(node.prefix, key.substring(pos + 1)) + 1;
+		final V val = remove(key, node, newPos);
+
+		// check if the `node` should be deleted
+		if (!node.isTerminal() && node.children.isEmpty()) {
+			current.children.remove(ch);
+			nodes--;
+		}
+
+		if (current != root) mergeNode(current);
+		return val;
+	}
+
+	private void mergeNode(final Node<V> current) {
+		if (current.children.size() == 1 && current != root) {
+			final Map.Entry<Character, Node<V>> entry = current.children.entrySet()
+					.stream()
+					.findFirst()
+					.get();
+
+			current.prefix.append(entry.getKey()).append(entry.getValue().prefix);
+			current.children.clear();
+			current.value = entry.getValue().value;
+			nodes--;
+		}
+	}
 
 	protected static class Node<V> extends Trie.Node<V> {
 

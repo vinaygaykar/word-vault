@@ -133,6 +133,38 @@ public class SimpleTrie<V> extends Trie<V> {
 		return this.nodes;
 	}
 
+	@Override
+	public Optional<V> remove(final String key) {
+		validateKey(key);
+
+		return Optional.ofNullable(remove(root, key, 0));
+	}
+
+	private V remove(final Node<V> current, final String key, final int index) {
+		if (index == key.length()) {
+			if (!current.isTerminal()) return null;
+
+			final V val = current.value;
+			current.value = null;
+			words--;
+			return val;
+		}
+
+		final char ch = key.charAt(index);
+		final Node<V> node = current.children.get(ch);
+
+		if (node == null) return null;
+
+		final V val = remove(node, key, index + 1);
+
+		// check if the `node` should be deleted
+		if (!node.isTerminal() && node.children.isEmpty()) {
+			current.children.remove(ch);
+			nodes--;
+		}
+
+		return val;
+	}
 
 	protected static class Node<V> extends Trie.Node<V> {
 
