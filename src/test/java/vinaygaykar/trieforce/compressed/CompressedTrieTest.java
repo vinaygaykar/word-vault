@@ -1,14 +1,14 @@
 package vinaygaykar.trieforce.compressed;
 
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import vinaygaykar.trieforce.simple.SimpleTrie;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,20 +73,29 @@ class CompressedTrieTest {
 	@Test
 	void testGetKeysWithPrefix() {
 		// given
-		final CompressedTrie<Integer> trie = new CompressedTrie<>();
-		trie.put("apple", 1);
-		trie.put("apply", 11);
-		trie.put("banana", 2);
-		trie.put("orange", 3);
-		trie.put("peach", 4);
-		trie.put("pear", 5);
-		trie.put("pineapple", 6);
+		final SimpleTrie<Integer> trie = new SimpleTrie<>();
+		// add some words
+		trie.put("ABC", 1);
+		trie.put("ABD", 2);
+		trie.put("ACE", 3);
+		trie.put("ACID", 4);
+		trie.put("ADIEU", 5);
 
 		// then
-		final List<String> expected = Arrays.asList("apple", "apply");
-		assertEquals(expected, trie.getKeysWithPrefix("a", 3));
-		assertEquals(Arrays.asList("peach", "pear", "pineapple"), trie.getKeysWithPrefix("p", 3));
-		assertEquals(Collections.emptyList(), trie.getKeysWithPrefix("z", 3));
+		// Test prefix has
+		assertArrayEquals(
+				trie.getKeysWithPrefix("A", 4).toArray(),
+				new String[]{ "ABC", "ABD", "ACE", "ACID" }
+		);
+		assertArrayEquals(
+				trie.getKeysWithPrefix("AB", 4).toArray(),
+				new String[]{ "ABC", "ABD" }
+		);
+		assertArrayEquals(
+				trie.getKeysWithPrefix("A", Comparator.reverseOrder(), 4).toArray(),
+				new String[]{ "ADIEU", "ACID", "ACE", "ABD" }
+		);
+		assertTrue(trie.getKeysWithPrefix("foo", 10).isEmpty());
 	}
 
 	@DisplayName("Basic `remove()` functionality test")

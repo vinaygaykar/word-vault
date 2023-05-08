@@ -1,6 +1,7 @@
 package vinaygaykar;
 
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,6 +65,20 @@ public interface Dictionary<V> {
 	/**
 	 * Searches the dictionary for all keys that that start with the given prefix.
 	 * Will return a list of all matching keys as a {@link List} of max size <tt>count</tt>.
+	 * Returned keys are in lexicographical order.
+	 * <p/>
+	 * Usage:
+	 * Consider the state of the dictionary with the following words: "ABC", "ABD", "ACE", "ACID", "ADIEU".
+	 * A call to this method as such:
+	 * <pre>{@code
+	 * 		final List<String> a = dict.getKeysWithPrefix("A", 4);
+	 * 		final List<String> b = dict.getKeysWithPrefix("AB", 4);
+	 * }</pre>
+	 * <p>
+	 * Contents of list <tt>a</tt> would be (in order) "ABC", "ABD", "ACE", "ACID".
+	 * Whereas contents of list <tt>b</tt> would be (in order) "ABC", "ABD"
+	 * Although value of <tt>count</tt> is 4 for both calls, for the list <tt>b</tt> there are not many words with the
+	 * prefix "AB"
 	 *
 	 * @param prefix the prefix to search for
 	 * @param count  the maximum number of words to return
@@ -73,7 +88,38 @@ public interface Dictionary<V> {
 	 * @throws IllegalArgumentException if the key is empty or count is not positive
 	 * @throws NullPointerException     if the key is <tt>null</tt>
 	 */
-	List<String> getKeysWithPrefix(final String prefix, final int count);
+	default List<String> getKeysWithPrefix(final String prefix, final int count) {
+		return getKeysWithPrefix(prefix, Comparator.naturalOrder(), count);
+	}
+
+	/**
+	 * Searches the dictionary for all keys that that start with the given prefix.
+	 * Will return a list of all matching keys as a {@link List} of max size <tt>count</tt>.
+	 * This method provides a way to specify ordering of keys.
+	 * <p/>
+	 * Usage:
+	 * Consider the state of the dictionary with the following words: "ABC", "ABD", "ACE", "ACID", "ADIEU".
+	 * A call to this method as such:
+	 * <pre>{@code
+	 * 		final List<String> a = dict.getKeysWithPrefix("A", Comparator.reverseOrder(), 4);
+	 * 		final List<String> b = dict.getKeysWithPrefix("AB", Comparator.reverseOrder(), 4);
+	 * }</pre>
+	 * <p>
+	 * Contents of list <tt>a</tt> would be (in order) "ADIEU", "ACID", "ACE", "ABD".
+	 * Whereas contents of list <tt>b</tt> would be (in order) "ABD", "ABC"
+	 * Although value of <tt>count</tt> is 4 for both calls, for the list <tt>b</tt> there are not many words with the
+	 * prefix "AB"
+	 *
+	 * @param prefix     the prefix to search for
+	 * @param count      the maximum number of words to return
+	 * @param comparator a character {@link Comparator} to specify order of returned keys
+	 *
+	 * @return a {@link List} of keys that start with the given prefix, up to a maximum of <tt>count</tt>
+	 *
+	 * @throws IllegalArgumentException if the key is empty or count is not positive
+	 * @throws NullPointerException     if the key is <tt>null</tt>
+	 */
+	List<String> getKeysWithPrefix(final String prefix, final Comparator<Character> comparator, final int count);
 
 	/**
 	 * Removes the key from this dictionary if it is present (optional operation).
@@ -118,7 +164,7 @@ public interface Dictionary<V> {
 	 * 		if (oldVal == null) {
 	 * 			put(key, value);
 	 * 			return null;
-	 * 		}
+	 *        }
 	 * 		else return oldVal;
 	 * }
 	 * </pre>

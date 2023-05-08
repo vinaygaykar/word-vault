@@ -71,7 +71,6 @@ final Optional<Integer> meaning = dict.get("hello");
 
 - A new interface (child perhaps, of Dictionary) which would only store words and not values, e.g., what HashSet is
   to HashMap
-- `getKeysWithPrefix()` with `Comparator`
 - Benchmarking data between `SimpleTrie` & `CompressedTrie`
 - Removing keys from the vault
 - DAWG implementation also? Won't go well with `Dictionary` but could be handy with the 1st of this section

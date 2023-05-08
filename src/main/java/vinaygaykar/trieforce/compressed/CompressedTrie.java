@@ -3,10 +3,11 @@ package vinaygaykar.trieforce.compressed;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 import vinaygaykar.trieforce.Trie;
 
@@ -154,7 +155,9 @@ public class CompressedTrie<V> extends Trie<V> {
 	}
 
 	@Override
-	public List<String> getKeysWithPrefix(final String prefix, final int count) {
+	public List<String> getKeysWithPrefix(final String prefix,
+										  final Comparator<Character> comparator,
+										  final int count) {
 		validateKey(prefix);
 		if (count < 1)
 			throw new IllegalArgumentException("Count of values to return with prefix is not a positive number");
@@ -165,7 +168,7 @@ public class CompressedTrie<V> extends Trie<V> {
 
 		final Node<V> node = nodeOpt.get();
 		final List<String> results = new ArrayList<>(count);
-		traverse(prefix + node.prefix, count, node, results);
+		traverse(prefix + node.prefix, count, node, comparator, results);
 
 		return results;
 	}
@@ -205,12 +208,21 @@ public class CompressedTrie<V> extends Trie<V> {
 		return aptr;
 	}
 
-	private void traverse(final String prefix, final int count, final Node<V> node, final List<String> results) {
+	private void traverse(final String prefix,
+						  final int count,
+						  final Node<V> node,
+						  final Comparator<Character> keyComparator,
+						  final List<String> results) {
 		if (results.size() >= count) return;
 		if (node.isTerminal()) results.add(prefix);
 
-		for (final Map.Entry<Character, Node<V>> entry : node.children.entrySet())
-			traverse(prefix + entry.getKey() + entry.getValue().prefix, count, entry.getValue(), results);
+		node.children.entrySet().stream()
+				.sorted((e1, e2) -> keyComparator.compare(e1.getKey(), e2.getKey()))
+				.forEachOrdered(entry -> {
+					if (results.size() <= count)
+						traverse(prefix + entry.getKey(), count, entry.getValue(), keyComparator, results);
+				});
+
 	}
 
 	@Override
@@ -285,7 +297,7 @@ public class CompressedTrie<V> extends Trie<V> {
 
 
 		private Node() {
-			this.children = new TreeMap<>();
+			this.children = new HashMap<>();
 			this.value = null;
 			this.prefix = new StringBuilder();
 		}

@@ -1,6 +1,8 @@
 package vinaygaykar.trieforce.simple;
 
 
+import java.util.Comparator;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -68,15 +70,28 @@ class SimpleTrieTest {
 	@Test
 	void testGetKeysWithPrefix() {
 		// given
-		final SimpleTrie<String> trie = new SimpleTrie<>();
+		final SimpleTrie<Integer> trie = new SimpleTrie<>();
 		// add some words
-		trie.put("hello", "abc");
-		trie.put("world", "def");
+		trie.put("ABC", 1);
+		trie.put("ABD", 2);
+		trie.put("ACE", 3);
+		trie.put("ACID", 4);
+		trie.put("ADIEU", 5);
 
 		// then
 		// Test prefix has
-		assertArrayEquals(trie.getKeysWithPrefix("he", 10).toArray(), new String[]{ "hello" });
-		assertArrayEquals(trie.getKeysWithPrefix("wor", 10).toArray(), new String[]{ "world" });
+		assertArrayEquals(
+				trie.getKeysWithPrefix("A", 4).toArray(),
+				new String[]{ "ABC", "ABD", "ACE", "ACID" }
+		);
+		assertArrayEquals(
+				trie.getKeysWithPrefix("AB", 4).toArray(),
+				new String[]{ "ABC", "ABD" }
+		);
+		assertArrayEquals(
+				trie.getKeysWithPrefix("A", Comparator.reverseOrder(), 4).toArray(),
+				new String[]{ "ADIEU", "ACID", "ACE", "ABD" }
+		);
 		assertTrue(trie.getKeysWithPrefix("foo", 10).isEmpty());
 	}
 
