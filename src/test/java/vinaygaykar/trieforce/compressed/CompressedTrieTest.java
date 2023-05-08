@@ -351,6 +351,7 @@ class CompressedTrieTest {
 			assertTrue(appeasement.get().isTerminal());
 			assertEquals("ent", appeasement.get().getPrefix().toString());
 			assertEquals(trie.find("appeasement"), appeasement);
+			assertEquals(2, appeasement.map(CompressedTrie.Node::getValue).orElse(Integer.MIN_VALUE));
 
 			assertEquals(8, trie.getCountOfNodes());
 		}

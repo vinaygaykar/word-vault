@@ -12,33 +12,41 @@ import vinaygaykar.trieforce.Trie;
 
 
 /**
- * SimpleTrie is an implementation of the Trie data structure for storing and searching words efficiently. It stores
- * words with an associated value of generic type and supports insertion of non-empty strings, and provides methods for
- * searching and checking for prefixes.
+ * As the name suggests this is simplest and default implementation of a Trie data structure, where every character
+ * of a key is represented as a tree node.
  * <p>
- * The SimpleTrie class provides methods for inserting words into the Trie, searching for a word in the Trie, and
- * searching for words starting with a prefix. The Trie is implemented using a Node class which contains a map of
- * character keys to child Nodes. Each Node also has a boolean flag indicating whether it marks the end of a word in the
- * Trie.
+ * Consider the following words: `HELLO`, `HELP` & `WORLD`, are represented as follows:
+ * <pre>
+ * root
+ * ├── H
+ * │   └── E
+ * │       └── L
+ * │           ├── L
+ * │           │   └── O (end)
+ * │           └── P (end)
+ * └── W
+ *     └── O
+ *         └── R
+ *             └── L
+ *                 └── D (end)
+ * </pre>
  * <p>
  * Example Usage:
  * <pre>
- *      final SimpleTrie<Integer> trie = new SimpleTrie<>();
- *      trie.insert("hello", 1);
- *      trie.insert("world", 2);
- *      trie.search("hello"); // returns true
- *      trie.search("world"); // returns true
- *      trie.search("foobar"); // returns false
- *      trie.startsWith("he"); // returns true
- *      trie.startsWith("w"); // returns true
- *      trie.startsWith("f"); // returns false
- *      trie.getValue("hello"); // return Optional.of(1);
- *      trie.getValue("foobar"); // return Optional.empty();
+ *      final Dictionary<Integer> trie = new SimpleTrie<>();
+ *      trie.put("HELLO", 1);
+ *      trie.put("HELP", 2);
+ *      trie.put("WORLD", 3);
+ *      trie.get("HELLO"); // returns 1 as {@link Optional}
+ *      trie.get("WORLD"); // returns 3 as {@link Optional}
+ *      trie.get("WoRlD"); // returns {@link Optional#empty()}
  * </pre>
  *
- * @param <V> Type of value associated with each word
+ * @param <V> the type of the values that are stored
  *
  * @author Vinay Gaykar
+ * @see vinaygaykar.Dictionary
+ * @see vinaygaykar.trieforce.Trie
  */
 public class SimpleTrie<V> extends Trie<V> {
 
@@ -171,6 +179,7 @@ public class SimpleTrie<V> extends Trie<V> {
 		private final Map<Character, Node<V>> children;
 
 		private V value;
+
 
 		private Node() {
 			this.children = new TreeMap<>();

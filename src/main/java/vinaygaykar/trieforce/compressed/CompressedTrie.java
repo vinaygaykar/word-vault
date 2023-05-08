@@ -11,6 +11,59 @@ import java.util.TreeMap;
 import vinaygaykar.trieforce.Trie;
 
 
+/**
+ * This is a space optimised version of a {@link Trie}.
+ * <p>
+ * Unlike {@link vinaygaykar.trieforce.simple.SimpleTrie} where every character of a key is a node, in this
+ * implementation, if a node has single child, then the child node is merged with parent node to save up on extra
+ * pointers and nodes.
+ * <p>
+ * Consider the following words: `HELLO`, `HELP` & `WORLD`, these are represented as follows:
+ * <pre>
+ * root
+ * ├── HEL
+ * │   ├── LO
+ * │   └── P
+ * └── WORLD
+ * </pre>
+ * <p>
+ * Example Usage:
+ * <pre>
+ * final Dictionary<Integer> trie = new SimpleTrie<>();
+ * trie.put("HELLO", 1);
+ * trie.put("HELP", 2);
+ * trie.put("WORLD", 3);
+ * trie.get("HELLO"); // returns 1 as {@link Optional}
+ * trie.get("WORLD"); // returns 3 as {@link Optional}
+ * trie.get("WoRlD"); // returns {@link Optional#empty()}
+ * </pre>
+ * <p>
+ * Whether this implementation is beneficial to the user or how much space is saved compared to the other
+ * implementation i.e. {@link vinaygaykar.trieforce.simple.SimpleTrie} really depends upon the data to store.
+ * If the data is made up of too many common characters, then this implementation can prove beneficial as exemplified
+ * by the use of the words `HELLO` & `HELP` above where both have common prefix substring, the worse case that can
+ * happen is every character is has its own node and the final tree created is similar to
+ * {@link vinaygaykar.trieforce.simple.SimpleTrie}.
+ * Consider the following tree where every character is split into a node: Words are `ABC`, `ABD`, `AE`, `FG` & `FH`.
+ * <pre>
+ * root
+ * ├── A
+ * │   ├── B
+ * │   │   ├── C
+ * │   │   └── D
+ * │   └── E
+ * └── F
+ *     ├── G
+ *     └── H
+ * </pre>
+ *
+ * @param <V> the type of the values that are stored
+ *
+ * @author Vinay Gaykar
+ * @see vinaygaykar.Dictionary
+ * @see vinaygaykar.trieforce.Trie
+ * @see vinaygaykar.trieforce.simple.SimpleTrie
+ */
 public class CompressedTrie<V> extends Trie<V> {
 
 	private final Node<V> root;
@@ -221,6 +274,7 @@ public class CompressedTrie<V> extends Trie<V> {
 		}
 	}
 
+
 	protected static class Node<V> extends Trie.Node<V> {
 
 		private final Map<Character, Node<V>> children;
@@ -242,7 +296,7 @@ public class CompressedTrie<V> extends Trie<V> {
 
 		@Override
 		public V getValue() {
-			return value;
+			return this.value;
 		}
 
 		@Override
