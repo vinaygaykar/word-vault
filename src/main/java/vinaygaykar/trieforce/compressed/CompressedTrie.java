@@ -168,7 +168,7 @@ public class CompressedTrie<V> extends Trie<V> {
 
 		final Node<V> node = nodeOpt.get();
 		final List<String> results = new ArrayList<>(count);
-		traverse(prefix + node.prefix, count, node, comparator, results);
+		traverse(new StringBuilder(prefix).append(node.prefix), count, node, comparator, results);
 
 		return results;
 	}
@@ -208,19 +208,21 @@ public class CompressedTrie<V> extends Trie<V> {
 		return aptr;
 	}
 
-	private void traverse(final String prefix,
+	private void traverse(final StringBuilder prefix,
 						  final int count,
 						  final Node<V> node,
 						  final Comparator<Character> keyComparator,
 						  final List<String> results) {
 		if (results.size() >= count) return;
-		if (node.isTerminal()) results.add(prefix);
+		if (node.isTerminal()) results.add(prefix.toString());
 
 		node.children.entrySet().stream()
 				.sorted((e1, e2) -> keyComparator.compare(e1.getKey(), e2.getKey()))
 				.forEachOrdered(entry -> {
-					if (results.size() <= count)
-						traverse(prefix + entry.getKey(), count, entry.getValue(), keyComparator, results);
+					if (results.size() <= count) {
+						traverse(prefix.append(entry.getKey()), count, entry.getValue(), keyComparator, results);
+						prefix.deleteCharAt(prefix.length() - 1);
+					}
 				});
 
 	}
