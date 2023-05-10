@@ -19,7 +19,7 @@ import vinaygaykar.trieforce.Trie;
  * implementation, if a node has single child, then the child node is merged with parent node to save up on extra
  * pointers and nodes.
  * <p>
- * Consider the following words: `HELLO`, `HELP` & `WORLD`, these are represented as follows:
+ * Consider the following words: `HELLO`, `HELP` &amp; `WORLD`, these are represented as follows:
  * <pre>
  * root
  * ├── HEL
@@ -30,7 +30,7 @@ import vinaygaykar.trieforce.Trie;
  * <p>
  * Example Usage:
  * <pre>
- * final Dictionary<Integer> trie = new SimpleTrie<>();
+ * final Dictionary	&lt;Integer	&gt; trie = new SimpleTrie&lt;&gt;();
  * trie.put("HELLO", 1);
  * trie.put("HELP", 2);
  * trie.put("WORLD", 3);
@@ -42,10 +42,11 @@ import vinaygaykar.trieforce.Trie;
  * Whether this implementation is beneficial to the user or how much space is saved compared to the other
  * implementation i.e. {@link vinaygaykar.trieforce.simple.SimpleTrie} really depends upon the data to store.
  * If the data is made up of too many common characters, then this implementation can prove beneficial as exemplified
- * by the use of the words `HELLO` & `HELP` above where both have common prefix substring, the worse case that can
+ * by the use of the words `HELLO` &amp; `HELP` above where both have common prefix substring, the worse case that can
  * happen is every character is has its own node and the final tree created is similar to
  * {@link vinaygaykar.trieforce.simple.SimpleTrie}.
- * Consider the following tree where every character is split into a node: Words are `ABC`, `ABD`, `AE`, `FG` & `FH`.
+ * Consider the following tree where every character is split into a node: Words are `ABC`, `ABD`, `AE`, `FG` &amp;
+ * `FH`.
  * <pre>
  * root
  * ├── A

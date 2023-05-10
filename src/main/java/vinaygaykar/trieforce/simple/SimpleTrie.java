@@ -16,7 +16,7 @@ import vinaygaykar.trieforce.Trie;
  * As the name suggests this is simplest and default implementation of a Trie data structure, where every character
  * of a key is represented as a tree node.
  * <p>
- * Consider the following words: `HELLO`, `HELP` & `WORLD`, are represented as follows:
+ * Consider the following words: `HELLO`, `HELP` &amp; `WORLD`, are represented as follows:
  * <pre>
  * root
  * ├── H
@@ -34,7 +34,7 @@ import vinaygaykar.trieforce.Trie;
  * <p>
  * Example Usage:
  * <pre>
- *      final Dictionary<Integer> trie = new SimpleTrie<>();
+ *      final Dictionary&lt;Integer&gt; trie = new SimpleTrie&lt;&gt;();
  *      trie.put("HELLO", 1);
  *      trie.put("HELP", 2);
  *      trie.put("WORLD", 3);

@@ -66,7 +66,7 @@ public interface Dictionary<V> {
 	 * Searches the dictionary for all keys that that start with the given prefix.
 	 * Will return a list of all matching keys as a {@link List} of max size <tt>count</tt>.
 	 * Returned keys are in lexicographical order.
-	 * <p/>
+	 * <p>
 	 * Usage:
 	 * Consider the state of the dictionary with the following words: "ABC", "ABD", "ACE", "ACID", "ADIEU".
 	 * A call to this method as such:
@@ -96,7 +96,7 @@ public interface Dictionary<V> {
 	 * Searches the dictionary for all keys that that start with the given prefix.
 	 * Will return a list of all matching keys as a {@link List} of max size <tt>count</tt>.
 	 * This method provides a way to specify ordering of keys.
-	 * <p/>
+	 * <p>
 	 * Usage:
 	 * Consider the state of the dictionary with the following words: "ABC", "ABD", "ACE", "ACID", "ADIEU".
 	 * A call to this method as such:
@@ -157,17 +157,6 @@ public interface Dictionary<V> {
 	 *
 	 * @throws IllegalArgumentException if the key is empty
 	 * @throws NullPointerException     if the key or value is <tt>null</tt>
-	 * @implSpec The default implementation is equivalent to:
-	 * <pre>
-	 * {@code
-	 * 		V oldVal = get(key);
-	 * 		if (oldVal == null) {
-	 * 			put(key, value);
-	 * 			return null;
-	 *        }
-	 * 		else return oldVal;
-	 * }
-	 * </pre>
 	 */
 	default Optional<V> putIfAbsent(final String key, final V value) {
 		validateKey(key);
@@ -210,15 +199,6 @@ public interface Dictionary<V> {
 	 * @throws NullPointerException     if the key, {@code mappingFunction} or the new value object generated from
 	 *                                  the function is <tt>null</tt>
 	 * @throws IllegalArgumentException if the key is empty
-	 * @implSpec The default implementation is equivalent to the following steps:
-	 * <pre>
-	 * {@code
-	 * 		if (dictionary.get(key) == null) {
-	 * 			V newValue = mappingFunction.apply(key);
-	 * 			dictionary.put(key, newValue);
-	 *    }
-	 * }
-	 * </pre>
 	 */
 	default Optional<V> computeIfAbsent(final String key,
 										final Function<String, ? extends V> mappingFunction) {
@@ -254,17 +234,6 @@ public interface Dictionary<V> {
 	 * @throws NullPointerException     if the key, {@code remappingFunction} or new value generated
 	 *                                  from the function is <tt>null</tt>
 	 * @throws IllegalArgumentException if the key is empty
-	 * @implSpec The default implementation is equivalent to performing the following steps:
-	 * <pre>
-	 * {@code
-	 * 		if (get(key) != null) {
-	 * 			V oldValue = get(key);
-	 * 			V newValue = remappingFunction.apply(key, oldValue);
-	 * 			if (newValue != null) put(key, newValue);
-	 * 			else remove(key);
-	 *    }
-	 * }
-	 * </pre>
 	 */
 	default Optional<V> computeIfPresent(final String key,
 										 final BiFunction<String, ? super V, ? extends V> remappingFunction) {
